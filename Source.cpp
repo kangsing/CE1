@@ -1,146 +1,257 @@
-//Assuming the user input would be of the correct type.
+// Author: Kang Sing
+// Matric card: A0114411B
+//
+// **********ASSUMPTIONS AND FUNCTIONALITIES**********
+// Assuming the user input would be all valid and lowercased.
+// E.g. Typing a number after the command "delete".
+// If user tries to delete items when the list is empty, programme will show error message.
+// If user tries to delete items out of the list, programme will show error message.
+// This is a project to create a text file based on user input 
+// and take in and store sentences by updating the text file.
+// Other functions include removing a data, displaying the remaining 
+// data in the file and clear the file of all contents when called. 
+
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
-string filename= "";
+string fileName= "";
 
-void createFile(string filename);
+void createFile(string fileName);
+vector<string> extractData(vector<string> file);
+vector<string> updateFile(vector<string> file);
+void commandAdd();
+void commandDisplay();
+void commandDelete();
+void commandClear();
+void commandSort();
+void printMessageSuccessAdd (string inputline);
+void printMessageSuccessDelete(string deleteString);
+void printMessageError(int errorNumber);
+void printMessageClear();
+void printMessageWelcome();
+void printMessageCommand();
+string readCommand();
 void performCommand();
-
 
 int main(int argc, char* argv[]){
 	cout << "c:>";
 	if(argc==2){	
-		filename = argv[1];
-		createFile(filename);
+		fileName = argv[1];
+		createFile(fileName);
 	}
+
+	printMessageWelcome();
+	printMessageCommand();
+	performCommand();
+
 	return 0;
 }
 
-void createFile(string filename){
-	ofstream writeFile(filename);
+void createFile(string fileName){
+	ofstream writeFile(fileName);
 		writeFile.close();
-	performCommand();
 }
 
-void performCommand(){
+// This function extracts exisitng file's data into vector "file"
+// and returns a vector of strings.
+vector<string> extractData(vector<string> file){
+
+	string data;
+	ifstream extract(fileName);
+	while(getline(extract,data)){
+		file.push_back(data);
+	}
+	extract.close();
+
+	return file;
+}
+
+// This function opens exisitng file and updates it with new information.
+vector<string> updateFile(vector<string> file){
+	ofstream add(fileName);	
+	int i=0;
+	int size=file.size();
+
+	while(size > 0){
+		add << file[i] << endl;
+		i++; 
+		size--;
+	}
+
+	add.close();
+	file.clear();
+	return file;
+}
+
+// This function adds a new piece of information to 
+// the destination file. 
+void commandAdd(){
 	vector <string> file;
-	cout << "Welcome to TextBuddy. "<< filename <<" is ready for use" << endl;
+	string inputline;
+	getline(cin,inputline);
+		
+	//Removing the extra whitespace infront
+	inputline = inputline.substr(1,inputline.length()); 
+	
+	file = extractData(file);
+	file.push_back(inputline);
+	printMessageSuccessAdd(inputline);
+
+	file = updateFile(file);
+}
+
+// This function displays all exisitng contents in the file.
+void commandDisplay(){
+	vector <string> file;
+	file = extractData(file);
+			
+	//Printing the contents in the format of
+	//1. <content #1>
+	//2. <content #2>
+	int counter=1;
+	for(int i=0 ; i!=file.size() ; i++){
+		cout << counter << ". ";
+		cout << file[i] << endl;
+		counter++;
+	}
+
+	//Error #3 tells user that file is empty.
+	if(file.empty()){
+		printMessageError(3); 
+		}
+	file.clear();
+}
+
+// This function deletes the specific information specify by the user input. 
+// It returns error messages if there is nothing to be deleted
+// or the number input to be deleted is invalid.
+void commandDelete(){
+	vector <string> file;
+
+	int number=0;
+	cin >> number;
+
+	file = extractData(file);
+
+	//Error #1 tells users that file is empty, there is
+	//nothing to delete.
+	if(file.empty()){
+		printMessageError(1);
+	}
+
+		//Error #2 tells users that there is no such
+		//data to be deleted - Invalid input.
+		else 
+			if(number > file.size()){
+				printMessageError(2);
+			}
+
+				else{
+					string deleteString;
+					deleteString = file[number-1];
+					file.erase(file.begin()+number-1);
+					printMessageSuccessDelete(deleteString);
+					file = updateFile(file);
+				}
+}
+
+// This function prints the respective error messages.
+void printMessageError(int errorNumber){
+	switch (errorNumber){
+		case(1):
+			cout << "Error: File is empty, nothing to delete." <<endl;
+			break;
+
+		case(2):
+			cout << "Error: Invalid item number to be deleted." << endl;
+			break;
+
+		case(3):
+			cout << fileName << " is empty"<< endl;
+			break;
+		}
+}
+
+// This function clears all the contents in the file
+// and returns with a success message. 
+void commandClear(){
+	ofstream add(fileName);
+	add.close();
+	printMessageClear();
+}
+
+void commandSort(){
+	vector <string> file;
+
+	file = extractData(file);
+	sort(file.begin(), file.end());
+
+	file = updateFile(file);
+}
+
+void printMessageSuccessAdd (string inputline){
+	cout << "added to " << fileName << ": " << '"' << inputline << '"' << endl;	
+}
+
+void printMessageSuccessDelete(string deleteString){
+	cout<< "deleted from " << fileName << ": " << '"' << deleteString << '"' << endl;
+}
+
+void printMessageClear(){
+	cout<< "all content deleted from " << fileName << endl;
+}
+
+void printMessageWelcome(){
+	cout << "Welcome to TextBuddy. "<< fileName <<" is ready for use" << endl;
+}
+
+void printMessageCommand(){
 	cout << "command: ";
+}
+
+// This function reads in the command and transform it into proper format.
+// For example transforming uppercase to lowercase.
+string readCommand(){
 	string command;
-	cin >> command;
+	cin>>command;
+	transform(command.begin(),command.end(),command.begin(),tolower);
+	return (command);
+}
+
+// This function sorts the command and calls the respective functions.
+void performCommand(){
+	string command = readCommand();
 
 	while(command != "exit"){
 
 		if(command == "add"){
-
-			string inputline;
-			getline(cin,inputline);
-				//removing the extra whitespace infront
-				inputline = inputline.substr(1,inputline.length()); 
-			cout << "added to " << filename << ": " << '"' << inputline << '"' << endl;
-
-			string data;
-			
-			ifstream in(filename);
-			while(getline(in,data)){
-				file.push_back(data);
-			}
-
-			in.close();
-			
-			file.push_back(inputline);
-			ofstream add(filename);
-			
-			int i=0;
-			int size=file.size();
-
-			while(size > 0){
-				add << file[i] << endl;
-				i++; size--;
-			}
-			add.close();
+			commandAdd();
 		}
 
-		if(command == "display"){
-			string data;
-			ifstream readFile(filename);
-			while (getline(readFile,data)){
-				file.push_back(data);
-			}
-
-			int counter=1;
-			for(int i=0 ; i!=file.size() ; i++){
-				cout << counter << ". ";
-				cout << file[i] << endl;
-				counter++;
-			}
-			if(file.empty())
-				cout << filename << " is empty"<< endl;
+		else if(command == "display"){
+			commandDisplay();
 		}
 
-		if(command == "delete"){
-			int number=0;
-			cin >> number;
-
-			string data;
-			ifstream readFile(filename);
-
-			while (getline(readFile,data)){
-				file.push_back(data);
-			}
-
-			if(file.empty()){
-				cout << "Error: File is empty, nothing to delete.";
-				break;
-			}
-
-			if(number > file.size()){
-				cout << "Error: Invalid item number to be deleted.";
-				break;
-			}
-
-			string deletestring;
-			deletestring = file[number-1];
-			file.erase(file.begin()+number-1);
-			cout<< "deleted from " << filename << ": " << '"' << deletestring << '"' << endl;
-
-			ofstream add(filename);
-			
-			int i=0;
-			int size=file.size();
-
-			while(size > 0){
-				add << file[i] << endl;
-				i++; size--;
-			}
-			add.close();
+		else if(command == "delete"){
+			commandDelete();
 		}
 
-		if(command == "clear"){
-			file.clear();
-			ofstream add(filename);
-			int i=0, size=file.size();
-
-			while(size > 0){
-				add << file[i] << endl;
-				i++; size--;
-			}
-
-			add.close();
-			cout<< "all content deleted from " << filename << endl;
+		else if(command == "clear"){
+			commandClear();
+		}
+		
+		else if(command == "sort"){
+			commandSort();
 		}
 
-		while(!file.empty()){
-				file.pop_back();
-		}
-			cout<< "command: ";
-			cin >> command;
+		printMessageCommand();
+		command = readCommand();
 	}
 }
 
