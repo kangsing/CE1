@@ -198,6 +198,8 @@ void commandSort(){
 	printMessageSuccessSort();
 }
 
+// This function searches for the keyword that the user input
+// and prints the search results out with it's repective number. 
 void commandSearch(){
 	vector <string> file;
 	file = extractData(file);
@@ -206,14 +208,12 @@ void commandSearch(){
 	cin >> searchString;
 
 	for(int i=0; i<file.size() ; i++){
-		for(int j=0; j<searchString.length();j++){
 			string extractString;
 			extractString = file[i];
 
 			if(extractString.find(searchString) != extractString.npos){
 				cout << i+1 << ". " << extractString << endl; 
 			}
-		}
 	}
 
 }
