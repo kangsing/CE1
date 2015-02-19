@@ -30,8 +30,10 @@ void commandDisplay();
 void commandDelete();
 void commandClear();
 void commandSort();
+void commandSearch();
 void printMessageSuccessAdd (string inputline);
 void printMessageSuccessDelete(string deleteString);
+void printMessageSuccessSort();
 void printMessageError(int errorNumber);
 void printMessageClear();
 void printMessageWelcome();
@@ -186,13 +188,34 @@ void commandClear(){
 	printMessageClear();
 }
 
+// This function sorts the items in the file in ascending order
+// Order: Numerical order first then in alphabetical order.
 void commandSort(){
 	vector <string> file;
-
 	file = extractData(file);
 	sort(file.begin(), file.end());
-
 	file = updateFile(file);
+	printMessageSuccessSort();
+}
+
+void commandSearch(){
+	vector <string> file;
+	file = extractData(file);
+
+	string searchString;
+	cin >> searchString;
+
+	for(int i=0; i<file.size() ; i++){
+		for(int j=0; j<searchString.length();j++){
+			string extractString;
+			extractString = file[i];
+
+			if(extractString.find(searchString) != extractString.npos){
+				cout << i+1 << ". " << extractString << endl; 
+			}
+		}
+	}
+
 }
 
 void printMessageSuccessAdd (string inputline){
@@ -201,6 +224,10 @@ void printMessageSuccessAdd (string inputline){
 
 void printMessageSuccessDelete(string deleteString){
 	cout<< "deleted from " << fileName << ": " << '"' << deleteString << '"' << endl;
+}
+
+void printMessageSuccessSort(){
+	cout<< fileName << " has been sorted." << endl;
 }
 
 void printMessageClear(){
@@ -248,6 +275,10 @@ void performCommand(){
 		
 		else if(command == "sort"){
 			commandSort();
+		}
+
+		else if(command == "search"){
+			commandSearch();
 		}
 
 		printMessageCommand();
