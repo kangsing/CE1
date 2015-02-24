@@ -126,7 +126,7 @@ void commandDisplay(){
 	//Error #3 tells user that file is empty.
 	if(file.empty()){
 		printMessageError(3); 
-		}
+	}
 	file.clear();
 }
 
@@ -210,12 +210,10 @@ void commandSearch(){
 	for(int i=0; i<file.size() ; i++){
 			string extractString;
 			extractString = file[i];
-
 			if(extractString.find(searchString) != extractString.npos){
 				cout << i+1 << ". " << extractString << endl; 
 			}
 	}
-
 }
 
 void printMessageSuccessAdd (string inputline){
